@@ -70,10 +70,7 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 	}
 
 	public void draw(SimGraphics G) {
-		if(energy > 10)
-			G.drawFastRoundRect(Color.green);
-		else
-			G.drawFastRoundRect(Color.blue);
+		G.drawOval(new Color(0xa52a2a));
 	}
 	
 	public void step() {

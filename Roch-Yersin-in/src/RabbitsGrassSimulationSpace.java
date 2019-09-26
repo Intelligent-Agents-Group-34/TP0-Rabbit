@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.Collections;
+
 import uchicago.src.sim.space.Object2DGrid;
 
 /**
@@ -32,30 +35,6 @@ public class RabbitsGrassSimulationSpace {
 			grassSpace.putObjectAt(x, y, new Integer(currentValue + 1));
 	    }
 	}
-	
-//	public void spreadGrass(int numGrass) {
-//		int totalSpaceSize = grassSpace.getSizeX()*grassSpace.getSizeY();
-//		if(numGrass < totalSpaceSize) {
-//			ArrayList<Integer> id_list = new ArrayList<Integer>();
-//	        for(int i = 0; i < totalSpaceSize; i++) {
-//	            id_list.add(new Integer(i));
-//	        }
-//	        Collections.shuffle(id_list);
-//	        for(int i = 0; i < numGrass; i++) {
-//	        	int id = id_list.get(i);
-//	        	int id_x = id%grassSpace.getSizeX();
-//	        	int id_y = id/grassSpace.getSizeX();
-//	        	grassSpace.putObjectAt(id_x, id_y, new Integer(1));
-//	        }
-//		}
-//		else {
-//		    for(int i = 0; i < grassSpace.getSizeX(); i++){
-//		    	for(int j = 0; j < grassSpace.getSizeY(); j++){
-//		    		grassSpace.putObjectAt(i, j, new Integer(1));
-//		    	}
-//		    }
-//		}
-//	}
 
 	public int getGrassAt(int x, int y) {
 		int i;
@@ -81,23 +60,26 @@ public class RabbitsGrassSimulationSpace {
 	}
 
 	public boolean addAgent(RabbitsGrassSimulationAgent agent) {
-	    boolean retVal = false;
-	    int count = 0;
-	    int countLimit = 10*agentSpace.getSizeX()*agentSpace.getSizeY();
-
-	    while((retVal == false) && (count < countLimit)) {
-	        int x = (int)(Math.random()*agentSpace.getSizeX());
-	        int y = (int)(Math.random()*agentSpace.getSizeY());
-	        if(isCellOccupied(x, y) == false) {
-	            agentSpace.putObjectAt(x, y, agent);
-	            agent.setXY(x, y);
-	            agent.setRabbitGrassSimulationSpace(this);
-	            retVal = true;
-	        }
-	        count++;
+	    ArrayList<Integer> free_spaces = new ArrayList<Integer>();
+	    for(int i = 0; i < agentSpace.getSizeX(); i++) {
+			for(int j = 0; j < agentSpace.getSizeY(); j++) {
+				if(!isCellOccupied(i, j)) {
+					free_spaces.add(new Integer(agentSpace.getSizeX()*j + i));
+				}
+			}
+		}
+	    if(free_spaces.isEmpty()) {
+	    	return false;
 	    }
-	    
-	    return retVal;
+	    else {
+	    	Collections.shuffle(free_spaces);
+	    	int x = free_spaces.get(0).intValue() % agentSpace.getSizeX();
+	    	int y = free_spaces.get(0).intValue()/agentSpace.getSizeX();
+	    	agentSpace.putObjectAt(x, y, agent);
+            agent.setXY(x, y);
+            agent.setRabbitGrassSimulationSpace(this);
+            return true;
+	    }
 	}
 	
 	public void removeAgentAt(int x, int y) {

@@ -52,11 +52,11 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 	
 	private RabbitsGrassSimulationSpace rgsSpace;
 	
-	private ArrayList agentList;
+	private ArrayList<RabbitsGrassSimulationAgent> agentList;
 	
 	private DisplaySurface displaySurface;
 	
-	private OpenSequenceGraph amountOfGrassInSpace;
+	private OpenSequenceGraph entitiesInSpace;
 	private OpenHistogram rabbitEnergyDistribution;
 
 	public static void main(String[] args) {
@@ -84,6 +84,17 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 		}
 	}
 	
+	class RabbitsInSpace implements DataSource, Sequence {
+		
+		public Object execute() {
+			return new Double(getSValue());
+		}
+
+		public double getSValue() {
+			return (double)countLivingAgents();
+		}
+	}
+	
 	class RabbitEnergy implements BinDataSource {
 		public double getBinValue(Object o) {
 			RabbitsGrassSimulationAgent agent = (RabbitsGrassSimulationAgent)o;
@@ -98,7 +109,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 	public void setup() {
 	    System.out.println("Running setup");
 	    rgsSpace = null;
-	    agentList = new ArrayList();
+	    agentList = new ArrayList<RabbitsGrassSimulationAgent>();
 	    schedule = new Schedule(1);
 	    
 	    // Tear down displays
@@ -107,10 +118,10 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 	    }
 	    displaySurface = null;
 	    
-	    if(amountOfGrassInSpace != null) {
-	    	amountOfGrassInSpace.dispose();
+	    if(entitiesInSpace != null) {
+	    	entitiesInSpace.dispose();
 	    }
-	    amountOfGrassInSpace = null;
+	    entitiesInSpace = null;
 	    
 	    if(rabbitEnergyDistribution != null) {
 	    	rabbitEnergyDistribution.dispose();
@@ -118,13 +129,13 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 	    rabbitEnergyDistribution = null;
 
 	    // Create displays
-	    displaySurface = new DisplaySurface(this, "Rabbit Model Window 1");
-	    amountOfGrassInSpace = new OpenSequenceGraph("Amount of Grass in Space", this);
+	    displaySurface = new DisplaySurface(this, "Rabbit Model Window");
+	    entitiesInSpace = new OpenSequenceGraph("Amount of Grass and Rabbits in Space", this);
 	    rabbitEnergyDistribution = new OpenHistogram("Rabbit Energy", 8, 0);
 
 	    // Register displays
-	    registerDisplaySurface("Rabbit Model Window 1", displaySurface);
-	    registerMediaProducer("Plot", amountOfGrassInSpace);
+	    registerDisplaySurface("Rabbit Model Window", displaySurface);
+	    registerMediaProducer("Plot", entitiesInSpace);
 	}
 
 	public void begin() {
@@ -133,7 +144,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 	    buildDisplay();
 	    
 	    displaySurface.display();
-	    amountOfGrassInSpace.display();
+	    entitiesInSpace.display();
 	    rabbitEnergyDistribution.display();
 	}
 
@@ -183,7 +194,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 	    
 	    class RabbitUpdateGrassInSpace extends BasicAction {
 	    	public void execute() {
-	    		amountOfGrassInSpace.step();
+	    		entitiesInSpace.step();
 	    	}
 	    }
 	    
@@ -204,7 +215,7 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 	    ColorMap map = new ColorMap();
 
 	    for(int i = 1; i<16; i++){
-	      map.mapColor(i, new Color(0, i*8 + 127, 0));
+	      map.mapColor(i, new Color(0, 255 - i*8, 0));
 	    }
 	    map.mapColor(0, Color.white);
 
@@ -217,7 +228,8 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 	    displaySurface.addDisplayableProbeable(displayGrass, "Grass");
 	    displaySurface.addDisplayableProbeable(displayAgents, "Agents");
 	    
-	    amountOfGrassInSpace.addSequence("Grass in Space", new GrassInSpace());
+	    entitiesInSpace.addSequence("Grass in Space", new GrassInSpace());
+	    entitiesInSpace.addSequence("Rabbits in Space", new RabbitsInSpace());
 	    rabbitEnergyDistribution.createHistogramItem("Rabbit Energy", agentList, new RabbitEnergy());
 	}
 	
