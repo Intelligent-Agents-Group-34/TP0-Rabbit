@@ -18,6 +18,7 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 	private int energy;
 	private int birthThreshold;
 	private int energyLossRate;
+	private int energyPerGrass;
 	
 	private static int IDNumber = 0;
 	private int ID;
@@ -26,13 +27,14 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 	
 	private RabbitsGrassSimulationSpace rgsSpace;
 	
-	public RabbitsGrassSimulationAgent(int minInitEnergy, int maxInitEnergy, int birthThreshold, int energyLossRate, RabbitsGrassSimulationModel model) {
+	public RabbitsGrassSimulationAgent(RabbitsGrassSimulationModel model) {
 		x = -1;
 	    y = -1;
 	    
-	    energy = (int)(minInitEnergy + (Math.random()*(maxInitEnergy - minInitEnergy)));
-	    this.birthThreshold = birthThreshold;
-	    this.energyLossRate = energyLossRate;
+	    energy = (int)(model.getRabbitMinInitEnergy() + (Math.random()*(model.getRabbitMaxInitEnergy() - model.getRabbitMinInitEnergy())));
+	    birthThreshold = model.getBirthThreshold();
+	    energyLossRate = model.getRabbitEnergyLossRate();
+	    energyPerGrass = model.getEnergyPerGrass();
 	    
 	    ID = IDNumber;
 	    IDNumber++;
@@ -70,7 +72,7 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 	}
 
 	public void draw(SimGraphics G) {
-		G.drawOval(new Color(0xa52a2a));
+		G.drawOval(Color.WHITE);
 	}
 	
 	public void step() {
@@ -91,7 +93,7 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 	    
 		tryMove(newX, newY);
 		
-		energy += rgsSpace.eatGrassAt(x, y);
+		energy += energyPerGrass*rgsSpace.eatGrassAt(x, y);
 		if(energy >= birthThreshold) {
 			model.addNewAgent();
 			energy = birthThreshold/2;

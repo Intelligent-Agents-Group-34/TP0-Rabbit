@@ -1,20 +1,18 @@
 import java.awt.Color;
 import java.util.ArrayList;
 
-import uchicago.src.sim.analysis.BinDataSource;
 import uchicago.src.sim.analysis.DataSource;
-import uchicago.src.sim.analysis.OpenHistogram;
 import uchicago.src.sim.analysis.OpenSequenceGraph;
 import uchicago.src.sim.analysis.Sequence;
 import uchicago.src.sim.engine.BasicAction;
 import uchicago.src.sim.engine.Schedule;
+import uchicago.src.sim.engine.SimInit;
 import uchicago.src.sim.engine.SimModelImpl;
 import uchicago.src.sim.gui.ColorMap;
 import uchicago.src.sim.gui.DisplaySurface;
 import uchicago.src.sim.gui.Object2DDisplay;
 import uchicago.src.sim.gui.Value2DDisplay;
 import uchicago.src.sim.util.SimUtilities;
-import uchicago.src.sim.engine.SimInit;
 
 /**
  * Class that implements the simulation model for the rabbits grass
@@ -29,13 +27,13 @@ import uchicago.src.sim.engine.SimInit;
 public class RabbitsGrassSimulationModel extends SimModelImpl {		
 	// Default values
 	private static final int GRIDSIZE = 20;
-	private static final int NUMINITRABBITS = 50;
+	private static final int NUMINITRABBITS = 10;
 	private static final int NUMINITGRASS = 1000;
 	private static final int GRASSGROWTHRATE = 100;
-	private static final int BIRTHTHRESHOLD = 10000;
-	private static final int RABBITMININITENERGY = 500;
-	private static final int RABBITMAXINITENERGY = 1000;
-	private static final int RABBITENERGYLOSSRATE = 25;
+	private static final int BIRTHTHRESHOLD = 500;
+	private static final int RABBITMININITENERGY = 50;
+	private static final int RABBITMAXINITENERGY = 100;
+	private static final int RABBITENERGYLOSSRATE = 3;
 	private static final int ENERGYPERGRASS = 1;
 	
 	private int gridSize = GRIDSIZE;
@@ -57,7 +55,6 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 	private DisplaySurface displaySurface;
 	
 	private OpenSequenceGraph entitiesInSpace;
-	private OpenHistogram rabbitEnergyDistribution;
 
 	public static void main(String[] args) {
 		
@@ -95,13 +92,6 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 		}
 	}
 	
-	class RabbitEnergy implements BinDataSource {
-		public double getBinValue(Object o) {
-			RabbitsGrassSimulationAgent agent = (RabbitsGrassSimulationAgent)o;
-			return (double)agent.getEnergy();
-		}
-	}
-	
 	public String getName() {
 		return "Rabbit Model";
 	}
@@ -122,16 +112,10 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 	    	entitiesInSpace.dispose();
 	    }
 	    entitiesInSpace = null;
-	    
-	    if(rabbitEnergyDistribution != null) {
-	    	rabbitEnergyDistribution.dispose();
-	    }
-	    rabbitEnergyDistribution = null;
 
 	    // Create displays
 	    displaySurface = new DisplaySurface(this, "Rabbit Model Window");
 	    entitiesInSpace = new OpenSequenceGraph("Amount of Grass and Rabbits in Space", this);
-	    rabbitEnergyDistribution = new OpenHistogram("Rabbit Energy", 8, 0);
 
 	    // Register displays
 	    registerDisplaySurface("Rabbit Model Window", displaySurface);
@@ -145,7 +129,6 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 	    
 	    displaySurface.display();
 	    entitiesInSpace.display();
-	    rabbitEnergyDistribution.display();
 	}
 
 	public void buildModel(){
@@ -199,14 +182,6 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 	    }
 	    
 	    schedule.scheduleActionAtInterval(10, new RabbitUpdateGrassInSpace());
-	    
-	    class RabbitUpdateRabbitEnergy extends BasicAction {
-	    	public void execute() {
-	    		rabbitEnergyDistribution.step();
-	    	}
-	    }
-	    
-	    schedule.scheduleActionAtInterval(10, new RabbitUpdateRabbitEnergy());
 	}
 	
 	public void buildDisplay(){
@@ -214,10 +189,10 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 	    
 	    ColorMap map = new ColorMap();
 
-	    for(int i = 1; i<16; i++){
-	      map.mapColor(i, new Color(0, 255 - i*8, 0));
+	    for(int i = 1; i < 32; i++){
+	      map.mapColor(i, new Color(0, 255 - i*4, 0));
 	    }
-	    map.mapColor(0, Color.white);
+	    map.mapColor(0, new Color(0xa52a2a));
 
 	    Value2DDisplay displayGrass =
 	        new Value2DDisplay(rgsSpace.getCurrentGrassSpace(), map);
@@ -230,12 +205,10 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 	    
 	    entitiesInSpace.addSequence("Grass in Space", new GrassInSpace());
 	    entitiesInSpace.addSequence("Rabbits in Space", new RabbitsInSpace());
-	    rabbitEnergyDistribution.createHistogramItem("Rabbit Energy", agentList, new RabbitEnergy());
 	}
 	
 	public void addNewAgent() {
-	    RabbitsGrassSimulationAgent a = new RabbitsGrassSimulationAgent(rabbitMinInitEnergy, rabbitMaxInitEnergy,
-	    																birthThreshold, rabbitEnergyLossRate, this);
+	    RabbitsGrassSimulationAgent a = new RabbitsGrassSimulationAgent(this);
 	    if(rgsSpace.addAgent(a)) {
 	    	agentList.add(a);
 	    }

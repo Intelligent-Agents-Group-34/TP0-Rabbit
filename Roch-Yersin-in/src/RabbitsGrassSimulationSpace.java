@@ -32,7 +32,9 @@ public class RabbitsGrassSimulationSpace {
 			// Get the value of the object at those coordinates
 			int currentValue = getGrassAt(x, y);
 			// Replace the Integer object with another one with the new value
-			grassSpace.putObjectAt(x, y, new Integer(currentValue + 1));
+			if(currentValue < 31) {
+				grassSpace.putObjectAt(x, y, new Integer(currentValue + 1));
+			}
 	    }
 	}
 
@@ -89,7 +91,7 @@ public class RabbitsGrassSimulationSpace {
 	public int eatGrassAt(int x, int y) {
 		int numGrass = getGrassAt(x, y);
 		grassSpace.putObjectAt(x, y, new Integer(0));
-		return numGrass*50;
+		return numGrass;
 	}
 	
 	public boolean moveAgentAt(int x, int y, int newX, int newY) {
