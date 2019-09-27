@@ -31,7 +31,10 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 		x = -1;
 	    y = -1;
 	    
-	    energy = (int)(model.getRabbitMinInitEnergy() + (Math.random()*(model.getRabbitMaxInitEnergy() - model.getRabbitMinInitEnergy())));
+	    int minEnergy = model.getRabbitMinInitEnergy();
+	    int maxEnergy = model.getRabbitMaxInitEnergy();
+	    // Random value between min and max
+	    energy = (int)(minEnergy + (Math.random()*(maxEnergy - minEnergy)));
 	    birthThreshold = model.getBirthThreshold();
 	    energyLossRate = model.getRabbitEnergyLossRate();
 	    energyPerGrass = model.getEnergyPerGrass();
@@ -72,12 +75,13 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 	}
 
 	public void draw(SimGraphics G) {
-		G.drawOval(Color.WHITE);
+		G.drawOval(Color.WHITE); // Rabbits are white ovals
 	}
 	
 	public void step() {
-		int direction = (int)(Math.random()*4);
-		int newX, newY;		
+		int direction = (int)(Math.random()*4); // Choose a direction at random
+		// Compute the new coords accordingly
+		int newX, newY;
 		if(direction/2 == 0) {
 			newX = x + (direction % 2 == 0 ? -1 : 1);
 			newY = y;
@@ -87,17 +91,23 @@ public class RabbitsGrassSimulationAgent implements Drawable {
 			newY = y + (direction % 2 == 0 ? -1 : 1);
 		}
 		
+		// "Torus" propriety of the space
 		Object2DGrid agentSpace = rgsSpace.getCurrentAgentSpace();
 		newX = (newX + agentSpace.getSizeX()) % agentSpace.getSizeX();
 	    newY = (newY + agentSpace.getSizeY()) % agentSpace.getSizeY();
 	    
 		tryMove(newX, newY);
 		
+		// Eat grass and gain energy
 		energy += energyPerGrass*rgsSpace.eatGrassAt(x, y);
+		
+		// Add a new rabbit if energy is above birth threshold
 		if(energy >= birthThreshold) {
 			model.addNewAgent();
-			energy = birthThreshold/2;
+			energy = birthThreshold/2; // "Energy cost" of reproducing
 		}
+		
+		// Passive energy loss
 		energy -= energyLossRate;
 	}
 	

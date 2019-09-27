@@ -16,6 +16,7 @@ public class RabbitsGrassSimulationSpace {
 		grassSpace = new Object2DGrid(xSize, ySize);
 		agentSpace = new Object2DGrid(xSize, ySize);
 		
+		// Populate the grass space with no grass
 	    for(int i = 0; i < xSize; i++){
 	    	for(int j = 0; j < ySize; j++){
 	    		grassSpace.putObjectAt(i, j, new Integer(0));
@@ -23,6 +24,7 @@ public class RabbitsGrassSimulationSpace {
 	    }
 	}
 	
+	// Spread randomly a given amount of grass across all cells
 	public void spreadGrass(int numInitGrass) {
 		for(int i = 0; i < numInitGrass; i++) {
 			// Choose coordinates
@@ -39,13 +41,11 @@ public class RabbitsGrassSimulationSpace {
 	}
 
 	public int getGrassAt(int x, int y) {
-		int i;
+		int i = 0;
 		if(grassSpace.getObjectAt(x, y) != null) {
 			i = ((Integer)grassSpace.getObjectAt(x, y)).intValue();
 		}
-		else {
-			i = 0;
-		}
+		
 		return i;
 	}
 	
@@ -62,6 +62,9 @@ public class RabbitsGrassSimulationSpace {
 	}
 
 	public boolean addAgent(RabbitsGrassSimulationAgent agent) {
+		// List with free space IDs. ID goes from left to right, top to bottom
+		// For example for a 2x2 grid: 0 1
+		//                             2 3
 	    ArrayList<Integer> free_spaces = new ArrayList<Integer>();
 	    for(int i = 0; i < agentSpace.getSizeX(); i++) {
 			for(int j = 0; j < agentSpace.getSizeY(); j++) {
@@ -70,14 +73,14 @@ public class RabbitsGrassSimulationSpace {
 				}
 			}
 		}
-	    if(free_spaces.isEmpty()) {
+	    if(free_spaces.isEmpty()) { // Return false if no space available
 	    	return false;
 	    }
 	    else {
-	    	Collections.shuffle(free_spaces);
+	    	Collections.shuffle(free_spaces); // Choose a free space at random
 	    	int x = free_spaces.get(0).intValue() % agentSpace.getSizeX();
 	    	int y = free_spaces.get(0).intValue()/agentSpace.getSizeX();
-	    	agentSpace.putObjectAt(x, y, agent);
+	    	agentSpace.putObjectAt(x, y, agent); // Add the agent at that space
             agent.setXY(x, y);
             agent.setRabbitGrassSimulationSpace(this);
             return true;
@@ -89,17 +92,17 @@ public class RabbitsGrassSimulationSpace {
 	}
 	
 	public int eatGrassAt(int x, int y) {
-		int numGrass = getGrassAt(x, y);
-		grassSpace.putObjectAt(x, y, new Integer(0));
+		int numGrass = getGrassAt(x, y); // Get the amount of grass
+		grassSpace.putObjectAt(x, y, new Integer(0)); // Set the amount of grass to zero in the space
 		return numGrass;
 	}
 	
 	public boolean moveAgentAt(int x, int y, int newX, int newY) {
-	    if(!isCellOccupied(newX, newY)) {
+	    if(!isCellOccupied(newX, newY)) { // If cell is free
 	    	RabbitsGrassSimulationAgent agent = (RabbitsGrassSimulationAgent)agentSpace.getObjectAt(x, y);
-	    	removeAgentAt(x,y);
-	    	agent.setXY(newX, newY);
-	    	agentSpace.putObjectAt(newX, newY, agent);
+	    	removeAgentAt(x,y); // Remove the agent at the old position
+	    	agent.setXY(newX, newY); // Update the agent coordinates
+	    	agentSpace.putObjectAt(newX, newY, agent); // Add the agent at the new position
 	    	return true;
 	    }
 	    return false;
