@@ -100,7 +100,6 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 	}
 	
 	public void setup() {
-	    System.out.println("Running setup");
 	    rgsSpace = null;
 	    agentList = new ArrayList<RabbitsGrassSimulationAgent>();
 	    schedule = new Schedule(1);
@@ -137,7 +136,6 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 
 	// Initialise the space and add grass and rabbits
 	public void buildModel(){
-	    System.out.println("Running BuildModel");
 	    rgsSpace = new RabbitsGrassSimulationSpace(gridSize, gridSize);
 	    rgsSpace.spreadGrass(numInitGrass);
 	    
@@ -153,7 +151,6 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 	
 	// Initialise the scheduled actions
 	public void buildSchedule(){
-	    System.out.println("Running BuildSchedule");
 	    
 	    // Action that update the simulation
 	    class RabbitStep extends BasicAction {
@@ -193,7 +190,6 @@ public class RabbitsGrassSimulationModel extends SimModelImpl {
 	
 	// Initialise the display
 	public void buildDisplay(){
-	    System.out.println("Running BuildDisplay");
 	    
 	    // Colour map for the ground 
 	    ColorMap map = new ColorMap();
